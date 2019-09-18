@@ -39,6 +39,12 @@ class Tooltip extends React.Component {
     place: PropTypes.oneOf(['top', 'right', 'bottom', 'left']),
     /** The popup content */
     content: PropTypes.func,
+    /** See react-tooltip */
+    delayHide: PropTypes.number,
+    /** See react-tooltip */
+    delayUpdate: PropTypes.number,
+    /** If your content is dynamic, use this prop to force the update by changing the value */
+    updateKey: PropTypes.string,
     /** The trigger. Either:
      *  - A render func, that gets passed props to set on the trigger
      *  - A React node, rendered inside an inline-div
@@ -49,6 +55,8 @@ class Tooltip extends React.Component {
   static defaultProps = {
     type: 'dark',
     place: 'top',
+    delayHide: 500,
+    delayUpdate: 500,
   };
 
   state = { id: null }; // We only set `id` on the client to avoid mismatches with SSR
@@ -57,10 +65,16 @@ class Tooltip extends React.Component {
     this.setState({ id: `tooltip-${uuid()}` });
   }
 
-  renderContent() {
+  // componentDidUpdate(oldProps) {
+  //   if (this.props.updateKey !== oldProps.updateKey) {
+  //     ReactTooltip.
+  //   }
+  // }
+
+  renderContent = () => {
     const { content } = this.props;
     return typeof content === 'function' ? content() : content;
-  }
+  };
 
   render() {
     const isMounted = Boolean(this.state.id);
@@ -76,13 +90,12 @@ class Tooltip extends React.Component {
           <StyledTooltip
             id={this.state.id}
             effect="solid"
-            delayHide={500}
-            delayUpdate={500}
+            delayHide={this.props.delayHide}
+            delayUpdate={this.props.delayUpdate}
             place={this.props.place}
             type={this.props.type}
-          >
-            {this.renderContent()}
-          </StyledTooltip>
+            getContent={this.renderContent}
+          />
         )}
       </React.Fragment>
     );
